@@ -1,6 +1,5 @@
-import cv2
-import numpy as np
 from PIL import Image
+import numpy as np
 import streamlit as st
 import tensorflow as tf
 
@@ -30,10 +29,13 @@ def detect_malaria(image):
     image_np = np.array(image)
     
     # Resize the image to 128x128
-    image_resized = cv2.resize(image_np, (128, 128))
+    image_resized = image.resize((128, 128))
+    
+    # Convert resized image to numpy array
+    image_array = np.array(image_resized)
     
     # Preprocess the image (e.g., normalize pixel values)
-    image_preprocessed = image_resized / 255.0
+    image_preprocessed = image_array / 255.0
     image_preprocessed = np.expand_dims(image_preprocessed, axis=0)
     
     # Make a prediction using the model
