@@ -1,6 +1,7 @@
-import streamlit as st
+import cv2
 import numpy as np
 from PIL import Image
+import streamlit as st
 import tensorflow as tf
 
 # Set page configuration
@@ -25,15 +26,18 @@ model = tf.keras.models.load_model('malaria_cnn_model.h5')
 
 # Malaria detection function
 def detect_malaria(image):
+    # Convert image to numpy array
+    image_np = np.array(image)
+    
     # Resize the image to 128x128
-    image = image.resize((128, 128))
+    image_resized = cv2.resize(image_np, (128, 128))
     
     # Preprocess the image (e.g., normalize pixel values)
-    image = np.array(image) / 255.0
-    image = np.expand_dims(image, axis=0)
+    image_preprocessed = image_resized / 255.0
+    image_preprocessed = np.expand_dims(image_preprocessed, axis=0)
     
     # Make a prediction using the model
-    predictions = model.predict(image)[0]
+    predictions = model.predict(image_preprocessed)[0]
     
     # Determine the prediction label and confidence score
     if predictions[0] > 0.5:
@@ -48,7 +52,16 @@ def detect_malaria(image):
 # Display the uploaded image and show the prediction
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+
+    # Create horizontal space to center the image
+    col1, col2, col3 = st.columns([1, 2, 1])
+
+    # Resize the image to a smaller size
+    smaller_image = image.resize((300, 300))
+
+    # Place the smaller image in the center column
+    with col2:
+        st.image(smaller_image, caption='Uploaded Cell Image')
 
     # Run the malaria detection function
     label, confidence_score = detect_malaria(image)
@@ -63,7 +76,7 @@ if uploaded_file is not None:
 # Sidebar
 st.sidebar.title("About")
 st.sidebar.write(
-    "This app uses a pre-trained machine learning model to detect the presence of malaria in blood smear images."
+    "This app uses a deep learning model to detect the presence of malaria in blood smear images."
 )
 
 st.sidebar.title("How to Use")
